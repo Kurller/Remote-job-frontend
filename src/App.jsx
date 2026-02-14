@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import LoginPage from "./pages/Login";
-import RegisterPage from "./pages/Register";
+import LoginPage from "./Pages/Login";
+import RegisterPage from "./Pages/Register";
 import Dashboard from "./components/Dashboard/Dashboard";
 import ApplyJob from "./Pages/ApplyJob";
 import ProtectedRoute from "./components/ProtectedRoute";
