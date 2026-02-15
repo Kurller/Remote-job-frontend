@@ -1,9 +1,17 @@
+// src/api/api.js
 import axios from "axios";
 
-// Use Vite environment variable for the base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // e.g., https://remote-job-application-manager.onrender.com
-  withCredentials: true, // send cookies if needed
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
+});
+
+api.interceptors.request.use((req) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+  return req;
 });
 
 export default api;
