@@ -1,19 +1,25 @@
 import React from "react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function TailoredCVActions({ tailoredCvId, filename }) {
   const token = localStorage.getItem("token");
 
-  const viewUrl = `http://localhost:10000/tailored-cvs/download/${tailoredCvId}?token=${token}`;
-  const downloadUrl = viewUrl;
+  const viewUrl = `${API_BASE_URL}/tailored-cvs/download/${tailoredCvId}`;
 
   const handleView = () => {
-    window.open(viewUrl, "_blank", "noopener,noreferrer");
+    window.open(
+      `${viewUrl}?preview=true`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   const handleDownload = () => {
     const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = filename || "tailored-cv.pdf";
+    a.href = viewUrl;
+    a.setAttribute("download", filename || "tailored-cv.pdf");
+    a.setAttribute("target", "_blank");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
