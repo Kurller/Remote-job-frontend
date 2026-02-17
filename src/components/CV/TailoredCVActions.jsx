@@ -3,7 +3,7 @@ import React from "react";
 export default function TailoredCVActions({ tailoredCvId, filename }) {
   const token = localStorage.getItem("token");
 
-  const viewUrl = `http://localhost:3000/tailored-cvs/download/${tailoredCvId}?token=${token}`;
+  const viewUrl = `http://localhost:10000/tailored-cvs/download/${tailoredCvId}?token=${token}`;
   const downloadUrl = viewUrl;
 
   const handleView = () => {
