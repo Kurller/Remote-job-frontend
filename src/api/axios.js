@@ -1,17 +1,32 @@
-// src/api/api.js
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL, // e.g. http://localhost:10000
   withCredentials: true,
 });
 
-api.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
-  }
-  return req;
-});
+API.interceptors.request.use(
+  (config) => {
+    // Disable caching (prevents 304 issues)
+    config.headers["Cache-Control"] = "no-cache";
+    config.headers["Pragma"] = "no-cache";
 
-export default api;
+    // Do NOT attach token to auth routes
+    const isAuthRoute =
+      config.url.includes("/auth/login") ||
+      config.url.includes("/auth/register") ||
+      config.url.includes("/auth/refresh");
+
+    if (!isAuthRoute) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export default API;
