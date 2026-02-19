@@ -8,7 +8,7 @@ export default function TailoredCVActions({ tailoredCvId, filename, cv_id, job_i
 
   const viewUrl = `${API_BASE_URL}/tailored-cvs/download/${tailoredCvId}`;
 
-  // ✅ Regenerate AI summary if missing
+  // Ensure AI summary exists by regenerating if needed
   const ensureAISummary = async () => {
     try {
       setLoading(true);
