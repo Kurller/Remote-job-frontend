@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { generateTailoredCV } from "../api/tailorcvApi";
+import { generateTailoredCV } from "../api/tailoredCvApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,16 +7,23 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
   const [tailoredCvId, setTailoredCvId] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Regenerate AI summary and get the latest CV ID
   const ensureAISummary = async () => {
     try {
       setLoading(true);
-      // regenerate and get latest tailored CV
-      const res = await generateTailoredCV({ cv_id, job_id, force: true });
-      setTailoredCvId(res.data.id); // update to latest CV ID
+
+      const res = await generateTailoredCV({
+        cv_id,
+        job_id,
+        force: true, // always regenerate to ensure AI summary
+      });
+
+      setTailoredCvId(res.data.id);
       return res.data.id;
     } catch (err) {
-      console.error("❌ AI regeneration failed:", err);
-      alert("Failed to generate AI summary");
+      console.error("❌ Failed to generate AI summary:", err);
+      alert("Failed to generate AI summary. Check your backend logs.");
+      return null;
     } finally {
       setLoading(false);
     }
@@ -25,12 +32,14 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
   const handleView = async () => {
     const id = tailoredCvId || (await ensureAISummary());
     if (!id) return;
+
     window.open(`${API_BASE_URL}/tailored-cvs/download/${id}?preview=true`, "_blank");
   };
 
   const handleDownload = async () => {
     const id = tailoredCvId || (await ensureAISummary());
     if (!id) return;
+
     const a = document.createElement("a");
     a.href = `${API_BASE_URL}/tailored-cvs/download/${id}`;
     a.setAttribute("download", filename || "tailored-cv.pdf");
@@ -48,6 +57,7 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
       >
         {loading ? "Generating AI..." : "View CV"}
       </button>
+
       <button
         onClick={handleDownload}
         disabled={loading}
