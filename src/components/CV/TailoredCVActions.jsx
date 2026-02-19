@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { generateTailoredCV } from "../api/tailorcvApi";
+import { generateTailoredCV } from "../api/tailoredVvApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
