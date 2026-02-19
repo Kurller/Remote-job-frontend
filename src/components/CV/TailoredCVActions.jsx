@@ -3,35 +3,37 @@ import { generateTailoredCV } from "../api/tailorcvApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export default function TailoredCVActions({ tailoredCvId, filename, cv_id, job_id }) {
+export default function TailoredCVActions({ cv_id, job_id, filename }) {
+  const [tailoredCvId, setTailoredCvId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const viewUrl = `${API_BASE_URL}/tailored-cvs/download/${tailoredCvId}`;
-
-  // Ensure AI summary exists by regenerating if needed
   const ensureAISummary = async () => {
     try {
       setLoading(true);
-      await generateTailoredCV({ cv_id, job_id, force: true });
+      // regenerate and get latest tailored CV
+      const res = await generateTailoredCV({ cv_id, job_id, force: true });
+      setTailoredCvId(res.data.id); // update to latest CV ID
+      return res.data.id;
     } catch (err) {
       console.error("❌ AI regeneration failed:", err);
-      alert("Failed to regenerate AI summary");
+      alert("Failed to generate AI summary");
     } finally {
       setLoading(false);
     }
   };
 
   const handleView = async () => {
-    await ensureAISummary(); // regenerate if needed
-    window.open(`${viewUrl}?preview=true`, "_blank", "noopener,noreferrer");
+    const id = tailoredCvId || (await ensureAISummary());
+    if (!id) return;
+    window.open(`${API_BASE_URL}/tailored-cvs/download/${id}?preview=true`, "_blank");
   };
 
   const handleDownload = async () => {
-    await ensureAISummary(); // regenerate if needed
+    const id = tailoredCvId || (await ensureAISummary());
+    if (!id) return;
     const a = document.createElement("a");
-    a.href = viewUrl;
+    a.href = `${API_BASE_URL}/tailored-cvs/download/${id}`;
     a.setAttribute("download", filename || "tailored-cv.pdf");
-    a.setAttribute("target", "_blank");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -46,7 +48,6 @@ export default function TailoredCVActions({ tailoredCvId, filename, cv_id, job_i
       >
         {loading ? "Generating AI..." : "View CV"}
       </button>
-
       <button
         onClick={handleDownload}
         disabled={loading}
