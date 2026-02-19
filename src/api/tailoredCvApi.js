@@ -1,13 +1,14 @@
 import API from "./api";
 
 // Generate tailored CV
-export const generateTailoredCV = async (jobId, userId, data) => {
+export const generateTailoredCV = async ({ cv_id, job_id, force = false }) => {
   return API.post("/tailored-cvs", {
-    jobId,
-    userId,
-    ...data,
+    cv_id,
+    job_id,
+    force,
   });
 };
+
 
 
 // Submit tailored CV
