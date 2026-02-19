@@ -1,28 +1,28 @@
 import React, { useState } from "react";
-import { generateTailoredCV } from "../api/tailoredCvApi";
+import { generateTailoredCV } from "../api/tailorcvApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function TailoredCVActions({ cv_id, job_id, filename }) {
-  const [tailoredCvId, setTailoredCvId] = useState(null);
+  const [tailoredCv, setTailoredCv] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Regenerate AI summary and get the latest CV ID
-  const ensureAISummary = async () => {
+  // Fetch or regenerate the latest tailored CV
+  const ensureLatestTailoredCV = async () => {
     try {
       setLoading(true);
 
       const res = await generateTailoredCV({
         cv_id,
         job_id,
-        force: true, // always regenerate to ensure AI summary
+        force: true, // always regenerate AI summary if needed
       });
 
-      setTailoredCvId(res.data.id);
-      return res.data.id;
+      setTailoredCv(res.data);
+      return res.data;
     } catch (err) {
-      console.error("❌ Failed to generate AI summary:", err);
-      alert("Failed to generate AI summary. Check your backend logs.");
+      console.error("❌ Failed to fetch or generate tailored CV:", err);
+      alert("Failed to generate AI summary. Check your backend.");
       return null;
     } finally {
       setLoading(false);
@@ -30,19 +30,22 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
   };
 
   const handleView = async () => {
-    const id = tailoredCvId || (await ensureAISummary());
-    if (!id) return;
+    const cv = tailoredCv || (await ensureLatestTailoredCV());
+    if (!cv) return;
 
-    window.open(`${API_BASE_URL}/tailored-cvs/download/${id}?preview=true`, "_blank");
+    // Add cache-busting to force fresh PDF
+    const viewUrl = `${API_BASE_URL}/tailored-cvs/download/${cv.id}?preview=true&t=${Date.now()}`;
+    window.open(viewUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async () => {
-    const id = tailoredCvId || (await ensureAISummary());
-    if (!id) return;
+    const cv = tailoredCv || (await ensureLatestTailoredCV());
+    if (!cv) return;
 
+    const downloadUrl = `${API_BASE_URL}/tailored-cvs/download/${cv.id}?t=${Date.now()}`;
     const a = document.createElement("a");
-    a.href = `${API_BASE_URL}/tailored-cvs/download/${id}`;
-    a.setAttribute("download", filename || "tailored-cv.pdf");
+    a.href = downloadUrl;
+    a.setAttribute("download", cv.filename || filename || "tailored-cv.pdf");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -53,7 +56,7 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
       <button
         onClick={handleView}
         disabled={loading}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Generating AI..." : "View CV"}
       </button>
@@ -61,7 +64,7 @@ export default function TailoredCVActions({ cv_id, job_id, filename }) {
       <button
         onClick={handleDownload}
         disabled={loading}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
       >
         {loading ? "Generating AI..." : "Download CV"}
       </button>
