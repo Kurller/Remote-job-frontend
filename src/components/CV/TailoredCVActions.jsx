@@ -38,29 +38,15 @@ export default function TailoredCVActions({ cv_id, job_id }) {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleDownload = async () => {
-    try {
-      if (!tailoredCV?.file_url) {
-        alert("CV file not available");
-        return;
-      }
-
-      const response = await fetch(`${tailoredCV.file_url}?t=${Date.now()}`);
-      if (!response.ok) throw new Error("Network response was not ok");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = tailoredCV.filename || "tailoredCV.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("❌ Failed to download tailored CV:", err);
-      alert("Failed to download tailored CV. Check console for details.");
+  const handleDownload = () => {
+    if (!tailoredCV?.id) {
+      console.error("Tailored CV ID missing:", tailoredCV);
+      alert("Unable to download CV");
+      return;
     }
+
+    // MUST match backend route exactly
+    window.location.href = `/api/tailored-cvs/download/${tailoredCV.id}`;
   };
 
   return (
