@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { generateTailoredCV } from "../api/tailoredCvApi";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export default function TailoredCVActions({ cv_id, job_id }) {
   const [tailoredCV, setTailoredCV] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch or regenerate the latest tailored CV
   const fetchLatestCV = async () => {
     try {
       setLoading(true);
       const res = await generateTailoredCV({
         cv_id,
         job_id,
-        force: true, // ensure AI summary is generated
+        force: true,
       });
       setTailoredCV(res.data);
     } catch (err) {
@@ -25,7 +22,6 @@ export default function TailoredCVActions({ cv_id, job_id }) {
     }
   };
 
-  // Fetch latest CV on mount
   useEffect(() => {
     fetchLatestCV();
   }, [cv_id, job_id]);
@@ -34,18 +30,37 @@ export default function TailoredCVActions({ cv_id, job_id }) {
   if (!tailoredCV) return <div>No tailored CV available.</div>;
 
   const handleView = () => {
-    const url = `${tailoredCV.file_url}?preview=true&t=${Date.now()}`; // cache-busting
+    if (!tailoredCV?.file_url) {
+      alert("File URL not available");
+      return;
+    }
+    const url = `${tailoredCV.file_url}?preview=true&t=${Date.now()}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleDownload = () => {
-    const url = `${tailoredCV.file_url}?t=${Date.now()}`; // cache-busting
-    const a = document.createElement("a");
-    a.href = url;
-    a.setAttribute("download", tailoredCV.filename);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleDownload = async () => {
+    try {
+      if (!tailoredCV?.file_url) {
+        alert("CV file not available");
+        return;
+      }
+
+      const response = await fetch(`${tailoredCV.file_url}?t=${Date.now()}`);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = tailoredCV.filename || "tailoredCV.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("❌ Failed to download tailored CV:", err);
+      alert("Failed to download tailored CV. Check console for details.");
+    }
   };
 
   return (
