@@ -46,7 +46,7 @@ export default function TailoredCVActions({ cv_id, job_id }) {
     }
 
     // MUST match backend route exactly
-    window.location.href = `/api/tailored-cvs/download/${tailoredCV.id}`;
+    window.location.href = `/tailored-cvs/download/${tailoredCV.id}`;
   };
 
   return (
