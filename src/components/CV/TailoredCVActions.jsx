@@ -5,14 +5,19 @@ export default function TailoredCVActions({ cv_id, job_id }) {
   const [tailoredCV, setTailoredCV] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  /* =========================
+     FETCH OR GENERATE TAILORED CV
+  ========================= */
   const fetchLatestCV = async () => {
     try {
       setLoading(true);
       const res = await generateTailoredCV({
         cv_id,
         job_id,
-        force: true,
+        force: true, // force AI summary
       });
+
+      // The backend now returns id, file_url, filename, ai_summary, job_title
       setTailoredCV(res.data);
     } catch (err) {
       console.error("❌ Failed to fetch/generate CV:", err);
@@ -29,23 +34,26 @@ export default function TailoredCVActions({ cv_id, job_id }) {
   if (loading) return <div>Generating AI summary...</div>;
   if (!tailoredCV) return <div>No tailored CV available.</div>;
 
+  /* =========================
+     VIEW CV IN NEW TAB
+  ========================= */
   const handleView = () => {
     if (!tailoredCV?.file_url) {
-      alert("File URL not available");
+      alert("CV file not available");
       return;
     }
-    const url = `${tailoredCV.file_url}?preview=true&t=${Date.now()}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(tailoredCV.file_url, "_blank", "noopener,noreferrer");
   };
 
+  /* =========================
+     DOWNLOAD CV
+     Redirects to backend route which redirects to Cloudinary
+  ========================= */
   const handleDownload = () => {
     if (!tailoredCV?.id) {
-      console.error("Tailored CV ID missing:", tailoredCV);
-      alert("Unable to download CV");
+      alert("CV ID missing");
       return;
     }
-
-    // MUST match backend route exactly
     window.location.href = `/tailored-cvs/download/${tailoredCV.id}`;
   };
 
