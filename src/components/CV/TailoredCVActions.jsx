@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { generateTailoredCV } from "../api/tailoredCvApi";
+import { generateTailoredCV } from "../api/tailoredCVApi";
+import API from "../api/api"; // ✅ use Axios baseURL
 
 export default function TailoredCVActions({ cv_id, job_id }) {
   const [tailoredCV, setTailoredCV] = useState(null);
@@ -20,7 +21,7 @@ export default function TailoredCVActions({ cv_id, job_id }) {
         force: true,
       });
 
-      // ✅ Normalize response (critical fix)
+      // normalize backend response
       const cv = res.data?.tailoredCV ?? res.data;
 
       if (!cv?.id) {
@@ -45,7 +46,7 @@ export default function TailoredCVActions({ cv_id, job_id }) {
   if (!tailoredCV) return <div>No tailored CV available.</div>;
 
   /* =========================
-     VIEW CV IN NEW TAB
+     VIEW CV
   ========================= */
   const handleView = () => {
     if (!tailoredCV.file_url) {
@@ -56,7 +57,7 @@ export default function TailoredCVActions({ cv_id, job_id }) {
   };
 
   /* =========================
-     DOWNLOAD CV
+     DOWNLOAD CV (FIXED)
   ========================= */
   const handleDownload = async () => {
     if (!tailoredCV?.id) {
@@ -64,23 +65,15 @@ export default function TailoredCVActions({ cv_id, job_id }) {
       return;
     }
 
-    console.log("⬇️ Downloading CV ID:", tailoredCV.id);
-
     try {
-      const response = await fetch(
+      const response = await API.get(
         `/tailored-cvs/download/${tailoredCV.id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
+        { responseType: "blob" }
       );
 
-      if (!response.ok) {
-        throw new Error("Download failed");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(
+        new Blob([response.data])
+      );
 
       const a = document.createElement("a");
       a.href = url;
