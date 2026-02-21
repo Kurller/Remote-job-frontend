@@ -22,12 +22,12 @@ export default function AdminApplications() {
   };
 
   // View CV in a new tab
-  const viewCV = (cvId) => {
+  // View CV in a new tab
+const viewCV = (cvId) => {
   const token = localStorage.getItem("token");
-  window.open(
-    `http://localhost:3000/cvs/download/${cvId}?token=${token}`,
-    "_blank"
-  );
+  // Use current window origin so it works in production
+  const baseUrl = window.location.origin;
+  window.open(`${baseUrl}/cvs/download/${cvId}?token=${token}`, "_blank");
 };
 
 

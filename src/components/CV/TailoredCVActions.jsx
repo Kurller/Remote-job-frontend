@@ -60,34 +60,31 @@ export default function TailoredCVActions({ cv_id, job_id }) {
      DOWNLOAD CV (FIXED)
   ========================= */
   const handleDownload = async () => {
-    if (!tailoredCV?.id) {
-      alert("CV ID missing");
-      return;
-    }
+  const cvId = tailoredCV?.id;
 
-    try {
-      const response = await API.get(
-        `/tailored-cvs/download/${tailoredCV.id}`,
-        { responseType: "blob" }
-      );
+  if (!cvId) {
+    alert("CV ID missing — cannot download.");
+    return;
+  }
 
-      const url = window.URL.createObjectURL(
-        new Blob([response.data])
-      );
+  try {
+    const response = await API.get(`/tailored-cvs/download/${cvId}`, {
+      responseType: "blob",
+    });
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = tailoredCV.filename || "tailoredCV.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("❌ Failed to download tailored CV:", err);
-      alert("Failed to download tailored CV");
-    }
-  };
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = tailoredCV.filename || "tailoredCV.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("❌ Failed to download CV:", err);
+    alert("Failed to download tailored CV. Check backend logs.");
+  }
+};
 
   return (
     <div className="flex flex-col gap-2">
