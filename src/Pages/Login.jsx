@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api/api";
@@ -11,40 +10,41 @@ export default function LoginPage({ setToken }) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const res = await API.post("/auth/login", { email, password });
+    try {
+      const res = await API.post("/auth/login", { email, password });
 
-    // Extract tokens from backend response
-    const accessToken = res.data.accessToken;
-    const refreshToken = res.data.refreshToken;
+      const accessToken = res.data.accessToken;
+      const refreshToken = res.data.refreshToken;
 
-    if (!accessToken) throw new Error("Access token not returned by backend");
+      if (!accessToken) throw new Error("Access token not returned by backend");
 
-    // Save tokens
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
+      setToken(accessToken);
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
 
-    // Navigate to dashboard
-    navigate("/dashboard");
-  } catch (err) {
-    console.error("Login error:", err);
-    setError(err.response?.data?.message || err.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 sm:p-6">
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow w-full max-w-md">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">
+          Login
+        </h1>
 
-        {error && <p className="text-red-600 mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-600 mb-4 text-center sm:text-left">{error}</p>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -54,8 +54,8 @@ export default function LoginPage({ setToken }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border px-3 py-2 rounded"
               placeholder="Enter your email"
+              className="w-full border px-3 py-3 sm:py-4 rounded text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -66,34 +66,26 @@ export default function LoginPage({ setToken }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border px-3 py-2 rounded"
               placeholder="Enter your password"
+              className="w-full border px-3 py-3 sm:py-4 rounded text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 sm:py-4 rounded text-base sm:text-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <div className="flex justify-between mt-4 text-sm">
-          {/* Forgot Password */}
-          <Link
-            to="/forgot-password"
-            className="text-blue-600 hover:underline"
-          >
+        <div className="flex flex-col sm:flex-row justify-between mt-4 text-sm">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline mb-2 sm:mb-0">
             Forgot Password?
           </Link>
 
-          {/* Sign Up */}
-          <Link
-            to="/register"
-            className="text-blue-600 hover:underline"
-          >
+          <Link to="/register" className="text-blue-600 hover:underline">
             Sign Up
           </Link>
         </div>

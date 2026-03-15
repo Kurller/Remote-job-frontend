@@ -8,7 +8,7 @@ export default function UserApplications() {
 
   const fetchApplications = async () => {
     try {
-      const res = await API.get("/applications"); // your route for getUserApplications
+      const res = await API.get("/applications");
       setApplications(res.data);
     } catch (err) {
       console.error(err);
@@ -21,21 +21,36 @@ export default function UserApplications() {
     fetchApplications();
   }, []);
 
-  if (loading) return <p>Loading applications...</p>;
-  if (!applications.length) return <p>No applications found.</p>;
+  if (loading) return <p className="text-center">Loading applications...</p>;
+  if (!applications.length)
+    return <p className="text-center">No applications found.</p>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-2 sm:px-4">
       {applications.map((app) => (
         <div
           key={app.application_id}
-          className="bg-white p-4 rounded shadow flex justify-between"
+          className="bg-white p-4 rounded-lg shadow flex flex-col md:flex-row md:justify-between gap-3"
         >
-          <div>
-            <h3 className="font-bold">{app.job_title}</h3>
-            <p>CV: {app.tailored_cv}</p>
-            <p>Status: {app.status}</p>
-            <p>Applied: {new Date(app.applied_at).toLocaleString()}</p>
+          <div className="space-y-1">
+            <h3 className="font-semibold text-lg break-words">
+              {app.job_title}
+            </h3>
+
+            <p className="text-sm text-gray-600 break-all">
+              CV: {app.tailored_cv}
+            </p>
+
+            <p className="text-sm">
+              Status:{" "}
+              <span className="font-medium text-blue-600">
+                {app.status}
+              </span>
+            </p>
+
+            <p className="text-xs text-gray-500">
+              Applied: {new Date(app.applied_at).toLocaleString()}
+            </p>
           </div>
         </div>
       ))}

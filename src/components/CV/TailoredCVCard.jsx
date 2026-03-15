@@ -5,21 +5,23 @@ export default function TailoredCVCard({ data }) {
   if (!data) return null;
 
   return (
-    <div className="mt-8 bg-white shadow rounded-lg p-6 border">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">
+    <div className="mt-6 bg-white shadow rounded-lg p-4 sm:p-6 border max-w-xl mx-auto">
+      {/* Header */}
+      <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-800">
         Tailored CV Ready ✅
       </h3>
 
-      <div className="space-y-2 text-sm text-gray-700">
-        <p>
-          <strong>Job Title:</strong> {data.jobTitle}
+      {/* CV Details */}
+      <div className="space-y-2 text-sm sm:text-base text-gray-700">
+        <p className="break-words">
+          <strong>Job Title:</strong> {data.jobTitle || "Unknown"}
         </p>
 
-        <p>
-          <strong>Filename:</strong> {data.filename}
+        <p className="break-words">
+          <strong>Filename:</strong> {data.filename || "N/A"}
         </p>
 
-        <p>
+        <p className="break-words">
           <strong>AI Generated:</strong>{" "}
           <span
             className={`font-semibold ${
@@ -31,15 +33,16 @@ export default function TailoredCVCard({ data }) {
         </p>
 
         <p className="mt-2 font-semibold">AI Summary:</p>
-        <div className="bg-gray-50 border p-3 rounded">
-          {data.ai_summary}
+        <div className="bg-gray-50 border p-3 rounded text-sm sm:text-base break-words">
+          {data.ai_summary || "Summary not generated yet."}
         </div>
       </div>
 
-      <div className="mt-6">
+      {/* Actions */}
+      <div className="mt-4 sm:mt-6">
         <TailoredCVActions
-          tailoredCvId={data.tailoredcvid}
-          filename={data.filename}
+          cv_id={data.tailoredcvid}
+          job_id={data.jobId || data.job_id}
         />
       </div>
     </div>

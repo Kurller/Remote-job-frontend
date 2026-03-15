@@ -22,6 +22,7 @@ export default function CVList() {
 
   const handleUpload = async () => {
     if (!file) return alert("Please select a file first.");
+
     const formData = new FormData();
     formData.append("cv", file);
 
@@ -40,58 +41,90 @@ export default function CVList() {
   };
 
   const handleDownload = async (cvId, filename) => {
-  try {
-    const res = await downloadCV(cvId); // send id
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename; // filename from cv object
-    a.click();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to download CV");
-  }
-};
+    try {
+      const res = await downloadCV(cvId);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download CV");
+    }
+  };
 
-const handleDelete = async (cvId) => {
-  if (!window.confirm("Delete this CV?")) return;
-  try {
-    await deleteCV(cvId); // send id
-    loadCVs();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to delete CV");
-  }
-};
+  const handleDelete = async (cvId) => {
+    if (!window.confirm("Delete this CV?")) return;
 
+    try {
+      await deleteCV(cvId);
+      loadCVs();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete CV");
+    }
+  };
 
   return (
-    <div className="p-4">
-      <h2>Upload CV</h2>
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload} disabled={loading || !file}>
-        {loading ? "Uploading..." : "Upload"}
-      </button>
+    <div className="p-4 max-w-3xl mx-auto">
+      {/* Upload Section */}
+      <h2 className="text-lg font-semibold mb-2">Upload CV</h2>
 
-      <hr className="my-4" />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="border p-2 rounded w-full"
+        />
 
-      <h2>Uploaded CVs</h2>
+        <button
+          onClick={handleUpload}
+          disabled={loading || !file}
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full sm:w-auto"
+        >
+          {loading ? "Uploading..." : "Upload"}
+        </button>
+      </div>
+
+      <hr className="my-6" />
+
+      {/* CV List */}
+      <h2 className="text-lg font-semibold mb-3">Uploaded CVs</h2>
+
       {cvs.length === 0 ? (
-        <p>No CVs uploaded yet.</p>
+        <p className="text-gray-500">No CVs uploaded yet.</p>
       ) : (
-        cvs.map((cv) => (
-          <div key={cv.filename} className="border p-2 mb-2 rounded flex justify-between">
-            <span>{cv.filename}</span>
-            <div className="space-x-2">
-              <button onClick={() => handleDownload(cv.id)} className="px-2 py-1 bg-blue-500 text-white rounded">
-                Download
-              </button>
-              <button onClick={() => handleDelete(cv.id)} className="px-2 py-1 bg-red-500 text-white rounded">
-                Delete
-              </button>
+        <div className="space-y-3">
+          {cvs.map((cv) => (
+            <div
+              key={cv.id}
+              className="border p-3 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            >
+              {/* Filename */}
+              <span className="break-all font-medium">
+                {cv.filename}
+              </span>
+
+              {/* Buttons */}
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => handleDownload(cv.id, cv.filename)}
+                  className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded"
+                >
+                  Download
+                </button>
+
+                <button
+                  onClick={() => handleDelete(cv.id)}
+                  className="flex-1 sm:flex-none bg-red-500 text-white px-3 py-2 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

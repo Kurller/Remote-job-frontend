@@ -6,27 +6,15 @@ export default function ApplyJob() {
   const { jobId } = useParams();
   const navigate = useNavigate();
 
-  /* =========================
-     Manual CV upload
-  ========================= */
   const [cv, setCv] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  /* =========================
-     User CVs
-  ========================= */
   const [cvs, setCvs] = useState([]);
   const [selectedCvId, setSelectedCvId] = useState("");
 
-  /* =========================
-     Tailored CV
-  ========================= */
   const [tailoredCV, setTailoredCV] = useState(null);
   const [generating, setGenerating] = useState(false);
 
-  /* =========================
-     Fetch user CVs
-  ========================= */
   useEffect(() => {
     const fetchCVs = async () => {
       try {
@@ -36,26 +24,17 @@ export default function ApplyJob() {
         console.error("Failed to fetch CVs", err);
       }
     };
-
     fetchCVs();
   }, []);
 
-  /* =========================
-     Generate Tailored CV
-  ========================= */
   const generateTailoredCV = async () => {
-    if (!selectedCvId) {
-      alert("Please select a CV first");
-      return;
-    }
-
+    if (!selectedCvId) return alert("Please select a CV first");
     setGenerating(true);
     try {
       const res = await API.post("/tailored-cvs", {
         job_id: Number(jobId),
         cv_id: Number(selectedCvId),
       });
-
       setTailoredCV(res.data);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to generate tailored CV");
@@ -64,50 +43,28 @@ export default function ApplyJob() {
     }
   };
 
-  /* =========================
-     Download Tailored CV
-  ========================= */
-  const downloadTailoredCV = async (id, filename = "tailored-cv.pdf") => {
-  try {
-    const res = await API.get(`/tailored-cvs/download/${id}`, {
-      responseType: "blob", // 👈 IMPORTANT
-    });
+  const downloadTailoredCV = async (id) => {
+    try {
+      const res = await API.get(`/tailored-cvs/download/${id}`, { responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      window.open(url, "_blank");
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download tailored CV");
+    }
+  };
 
-    const blob = new Blob([res.data], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
-
-    // 👉 Open in new tab (ADMIN / USER VIEW)
-    window.open(url, "_blank");
-
-    
-    setTimeout(() => window.URL.revokeObjectURL(url), 10000);
-  } catch (err) {
-    console.error(err);
-    alert("Failed to download tailored CV");
-  }
-};
-
-
-  /* =========================
-     Submit Job Application
-  ========================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!cv) {
-      alert("Please upload your CV");
-      return;
-    }
-
+    if (!cv) return alert("Please upload your CV");
     const formData = new FormData();
     formData.append("cv", cv);
-
     setLoading(true);
     try {
       await API.post(`/applications/apply/${jobId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       alert("Application submitted successfully");
       navigate("/dashboard/jobs");
     } catch (err) {
@@ -118,13 +75,12 @@ export default function ApplyJob() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-md sm:max-w-lg md:max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
 
-      {/* ================= Tailored CV Section ================= */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Tailored CV (AI)</h2>
+      {/* Tailored CV Section */}
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold mb-3">Tailored CV (AI)</h2>
 
-        {/* CV Selector */}
         <select
           value={selectedCvId}
           onChange={(e) => setSelectedCvId(e.target.value)}
@@ -142,30 +98,18 @@ export default function ApplyJob() {
           <button
             onClick={generateTailoredCV}
             disabled={generating}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
             {generating ? "Generating..." : "Generate Tailored CV"}
           </button>
         ) : (
-          <div className="border rounded-lg p-4 space-y-2 bg-gray-50">
-            <p>
-              <span className="font-semibold">Job Title:</span>{" "}
-              {tailoredCV.jobTitle}
-            </p>
-
-            <p>
-              <span className="font-semibold">File:</span>{" "}
-              {tailoredCV.filename}
-            </p>
-
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">AI Summary:</span>{" "}
-              {tailoredCV.ai_summary}
-            </p>
-
+          <div className="bg-gray-50 border rounded-lg p-3 sm:p-4 space-y-2">
+            <p><strong>Job Title:</strong> {tailoredCV.jobTitle}</p>
+            <p><strong>File:</strong> {tailoredCV.filename}</p>
+            <p className="text-sm text-gray-600"><strong>AI Summary:</strong> {tailoredCV.ai_summary}</p>
             <button
               onClick={() => downloadTailoredCV(tailoredCV.tailoredcvid)}
-              className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
             >
               Download Tailored CV
             </button>
@@ -173,15 +117,13 @@ export default function ApplyJob() {
         )}
       </div>
 
-      {/* ================= Manual CV Upload ================= */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Apply with Your CV</h2>
+      {/* Manual CV Upload */}
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold mb-3">Apply with Your CV</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Upload CV (PDF or DOC)
-            </label>
+            <label className="block text-sm font-medium mb-1">Upload CV (PDF or DOC)</label>
             <input
               type="file"
               accept=".pdf,.doc,.docx"

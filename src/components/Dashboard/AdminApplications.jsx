@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "../../api/api"; // axios instance
-import { downloadCV } from "../../api/cvApi"; // for download
+import API from "../../api/api";
 
 export default function AdminApplications() {
   const [applications, setApplications] = useState([]);
@@ -12,7 +11,7 @@ export default function AdminApplications() {
 
   const fetchApplications = async () => {
     try {
-      const res = await API.get("/applications/all"); // admin endpoint
+      const res = await API.get("/applications/all");
       setApplications(res.data || []);
     } catch (err) {
       console.error("Error fetching applications:", err);
@@ -21,16 +20,11 @@ export default function AdminApplications() {
     }
   };
 
-  // View CV in a new tab
-  // View CV in a new tab
-const viewCV = (cvId) => {
-  const token = localStorage.getItem("token");
-  // Use current window origin so it works in production
-  const baseUrl = window.location.origin;
-  window.open(`${baseUrl}/cvs/download/${cvId}?token=${token}`, "_blank");
-};
-
-
+  const viewCV = (cvId) => {
+    const token = localStorage.getItem("token");
+    const baseUrl = window.location.origin;
+    window.open(`${baseUrl}/cvs/download/${cvId}?token=${token}`, "_blank");
+  };
 
   if (loading)
     return <p className="text-center mt-6">Loading applications...</p>;
@@ -38,10 +32,11 @@ const viewCV = (cvId) => {
     return <p className="text-center mt-6">No applications found.</p>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">All Job Applications</h2>
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <h2 className="text-2xl font-bold mb-4 sm:mb-6">All Job Applications</h2>
 
-      <div className="overflow-x-auto border rounded">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto border rounded">
         <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-gray-100 text-left">
@@ -57,23 +52,19 @@ const viewCV = (cvId) => {
               const appliedDate = app.appliedAt || app.applied_at;
               return (
                 <tr key={app.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border">{app.user?.name || "N/A"}</td>
-                  <td className="px-4 py-2 border">
-                    {app.job?.title || "N/A"}{" "}
-                    {app.job?.company ? `- ${app.job.company}` : ""}
+                  <td className="px-4 py-2 border break-words">{app.user?.name || "N/A"}</td>
+                  <td className="px-4 py-2 border break-words">
+                    {app.job?.title || "N/A"} {app.job?.company ? `- ${app.job.company}` : ""}
                   </td>
-                  <td className="px-4 py-2 border">
+                  <td className="px-4 py-2 border break-words">
                     {app.cv?.name || "N/A"}
                     {app.cv?.id && (
-                      <>
-                        <button
-                          onClick={() => viewCV(app.cv.id)}
-                          className="ml-2 text-blue-600 underline"
-                        >
-                          View
-                        </button>
-                        
-                      </>
+                      <button
+                        onClick={() => viewCV(app.cv.id)}
+                        className="ml-2 text-blue-600 underline"
+                      >
+                        View
+                      </button>
                     )}
                   </td>
                   <td className="px-4 py-2 border">
@@ -97,6 +88,50 @@ const viewCV = (cvId) => {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {applications.map((app) => {
+          const appliedDate = app.appliedAt || app.applied_at;
+          return (
+            <div
+              key={app.id}
+              className="bg-white border rounded-lg p-4 shadow space-y-2"
+            >
+              <p className="break-words"><strong>User:</strong> {app.user?.name || "N/A"}</p>
+              <p className="break-words">
+                <strong>Job:</strong> {app.job?.title || "N/A"} {app.job?.company ? `- ${app.job.company}` : ""}
+              </p>
+              <p className="break-words">
+                <strong>CV:</strong> {app.cv?.name || "N/A"}{" "}
+                {app.cv?.id && (
+                  <button
+                    onClick={() => viewCV(app.cv.id)}
+                    className="ml-2 text-blue-600 underline text-sm"
+                  >
+                    View
+                  </button>
+                )}
+              </p>
+              <p><strong>Applied At:</strong> {appliedDate ? new Date(appliedDate).toLocaleString() : "N/A"}</p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    app.status === "accepted"
+                      ? "bg-green-100 text-green-700"
+                      : app.status === "rejected"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {app.status || "pending"}
+                </span>
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

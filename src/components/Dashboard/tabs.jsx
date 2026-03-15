@@ -15,7 +15,7 @@ const tabs = [
     id: "admin-applications",
     label: "All Applications",
     component: <AdminApplications />,
-     // only visible to admins
+    adminOnly: true, // mark admin tab for Sidebar filtering
   },
 ];
 
