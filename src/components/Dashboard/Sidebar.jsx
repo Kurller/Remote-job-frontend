@@ -2,9 +2,12 @@ import React from "react";
 import tabs from "./tabs";
 
 export default function Sidebar({ activeTab, setActiveTab, isAdmin, sidebarOpen, onClose }) {
+  // Filter tabs for user/admin
+  const visibleTabs = tabs.filter(tab => !tab.adminOnly || isAdmin);
+
   return (
     <>
-      {/* Overlay on mobile when sidebar is open */}
+      {/* Mobile overlay */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity md:hidden ${
           sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -12,6 +15,7 @@ export default function Sidebar({ activeTab, setActiveTab, isAdmin, sidebarOpen,
         onClick={onClose}
       ></div>
 
+      {/* Sidebar */}
       <aside
         className={`
           fixed top-0 left-0 h-full z-40 bg-white w-64 p-4 shadow
@@ -21,22 +25,19 @@ export default function Sidebar({ activeTab, setActiveTab, isAdmin, sidebarOpen,
         `}
       >
         <ul className="space-y-2">
-          {tabs
-            .filter(tab => !tab.adminOnly || isAdmin)
-            .map(tab => (
-              <li
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  onClose?.(); // close sidebar on mobile
-                }}
-                className={`cursor-pointer p-3 rounded font-medium truncate
-                  ${activeTab === tab.id ? "bg-blue-600 text-white" : "hover:bg-gray-200"}
-                `}
-              >
-                {tab.label}
-              </li>
-            ))}
+          {visibleTabs.map(tab => (
+            <li
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                onClose?.();
+              }}
+              className={`cursor-pointer p-3 rounded font-medium truncate
+                ${activeTab === tab.id ? "bg-blue-600 text-white" : "hover:bg-gray-200"}`}
+            >
+              {tab.label}
+            </li>
+          ))}
         </ul>
       </aside>
     </>

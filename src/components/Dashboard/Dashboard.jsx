@@ -30,7 +30,7 @@ export default function Dashboard({ setToken }) {
       {/* Navbar */}
       <Navbar onLogout={handleLogout} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
 
         {/* Mobile Sidebar Toggle */}
         <button
@@ -41,22 +41,16 @@ export default function Dashboard({ setToken }) {
         </button>
 
         {/* Sidebar */}
-        <div
-          className={`
-            fixed md:static top-0 left-0 h-full z-40
-            transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            md:translate-x-0 transition-transform duration-300
-          `}
-        >
-          <Sidebar
-            activeTab={activeTab}
-            setActiveTab={(tab) => {
-              setActiveTab(tab);
-              setSidebarOpen(false); // close sidebar on mobile
-            }}
-            isAdmin={isAdmin}
-          />
-        </div>
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={(tab) => {
+            setActiveTab(tab);
+            setSidebarOpen(false); // close sidebar on mobile after click
+          }}
+          isAdmin={isAdmin}
+          sidebarOpen={sidebarOpen}    // pass sidebarOpen for overlay
+          onClose={() => setSidebarOpen(false)} // pass onClose to handle overlay click
+        />
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
