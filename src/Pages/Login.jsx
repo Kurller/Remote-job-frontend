@@ -17,16 +17,19 @@ export default function LoginPage({ setToken }) {
     try {
       const res = await API.post("/auth/login", { email, password });
 
-      const accessToken = res.data.accessToken;
-      const refreshToken = res.data.refreshToken;
+const { accessToken, refreshToken, user } = res.data;
 
-      if (!accessToken) throw new Error("Access token not returned by backend");
+if (!accessToken) throw new Error("Access token not returned by backend");
 
-      setToken(accessToken);
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+setToken(accessToken);
 
-      navigate("/dashboard");
+// ✅ SAVE USER (THIS IS WHAT YOU MISSED)
+localStorage.setItem("user", JSON.stringify(user));
+
+localStorage.setItem("token", accessToken);
+localStorage.setItem("refreshToken", refreshToken);
+
+navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || err.message || "Login failed");
