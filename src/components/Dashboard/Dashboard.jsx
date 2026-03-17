@@ -42,16 +42,13 @@ export default function Dashboard({ setToken }) {
 
         {/* Sidebar */}
         <Sidebar
-          activeTab={activeTab}
-          setActiveTab={(tab) => {
-            setActiveTab(tab);
-            setSidebarOpen(false); // close sidebar on mobile after click
-          }}
-          isAdmin={isAdmin}
-          sidebarOpen={sidebarOpen}    // pass sidebarOpen for overlay
-          onClose={() => setSidebarOpen(false)} // pass onClose to handle overlay click
-        />
-
+  activeTab={activeTab}
+  setActiveTab={setActiveTab}
+  isAdmin={user?.role?.trim() === "admin"}
+  sidebarOpen={sidebarOpen}
+  onClose={() => setSidebarOpen(false)}
+  tabs={visibleTabs}   // ✅ ADD THIS
+/>
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {activeComponent || <p>Tab not found</p>}
