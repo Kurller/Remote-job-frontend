@@ -32,42 +32,34 @@ export default function CVUpload({ onUploaded }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // ✅ must be first
+  e.preventDefault();
 
-    if (!file) {
-      alert("Please select a file first");
-      return;
-    }
+  const token = localStorage.getItem("token");
 
-    const formData = new FormData();
-    formData.append("cv", file);
+  if (!token) {
+    alert("You must login first");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  if (!file) {
+    alert("Please select a file first");
+    return;
+  }
 
-      // ❗ DO NOT manually set Content-Type
-      await uploadCVs(formData);
+  const formData = new FormData();
+  formData.append("cv", file);
 
-      alert("CV uploaded successfully");
-      onUploaded?.();
-
-      // ✅ Reset properly (important for mobile)
-      setFile(null);
-      e.target.reset();
-
-    } catch (err) {
-      console.error("Upload error:", err);
-
-      alert(
-        err?.response?.data?.message ||
-        err.message ||
-        "Upload failed"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  try {
+    setLoading(true);
+    await uploadCVs(formData);
+    alert("CV uploaded successfully");
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Upload failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <form
       onSubmit={handleSubmit}
