@@ -1,13 +1,18 @@
-import API from "./api"; // your axios instance
+import API from "./api";
 
+// Get all CVs
 export const fetchCVs = () => API.get("/cvs");
 
+// Upload CV (FIXED)
 export const uploadCVs = (formData) =>
-  API.post("/cvs/upload", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  API.post("/cvs/upload", formData);
 
-export const deleteCV = (cvId) => API.delete(`/cvs/delete/${cvId}`);
+// Delete CV
+export const deleteCV = (cvId) =>
+  API.delete(`/cvs/delete/${cvId}`);
 
+// Download CV
 export const downloadCV = (cvId) =>
-  API.get(`/cvs/download/${cvId}`, { responseType: "blob" });
+  API.get(`/cvs/download/${cvId}`, {
+    responseType: "blob",
+  });
